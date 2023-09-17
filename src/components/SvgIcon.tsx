@@ -11,7 +11,7 @@ export default function SvgIcon(props: { name: string; className?: string }) {
     if (!svgIconList.has(id)) {
       svgIconList.add(id);
       // remove `?raw` for rollup building
-      import(`../assets/svg/${props.name}.svg` + (import.meta.env.DEV ? "?raw" : ""))
+      import(`../assets/svg/${props.name}.svg?raw`)
         .then((res) => {
           const svgElement = new DOMParser()
             .parseFromString(res.default, "image/svg+xml")

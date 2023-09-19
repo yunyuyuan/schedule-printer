@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 
-export default function SvgIcon(props: { name: string; className?: string }) {
+export default function SvgIcon(props: { name: string; size?: number; className?: string }) {
   const [eId, setEId] = useState("icon-");
+  const size = props.size || 16;
+
   useEffect(() => {
     const id = `icon-${props.name}`;
     setEId(`#${id}`);
@@ -32,7 +34,13 @@ export default function SvgIcon(props: { name: string; className?: string }) {
     }
   }, [props.name]);
   return (
-    <svg className={props.className}>
+    <svg
+      className={props.className}
+      style={{
+        width: size + "px",
+        height: size + "px",
+      }}
+    >
       <use href={eId} />
     </svg>
   );

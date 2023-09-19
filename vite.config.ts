@@ -10,24 +10,26 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   resolve: {
     alias: {
-      "~": path.resolve(__dirname, "./src")
-    }
+      "~": path.resolve(__dirname, "./src"),
+    },
   },
   build: {
     rollupOptions: {
-      plugins: [{
-        name: "raw-svg-file-loader",
-        transform (_: string, filepath: string) {
-          if (filepath.includes("node_modules")) {
-            return null;
-          }
-          if (filepath.endsWith(".svg")) {
-            return {
-              code: dataToEsm(fs.readFileSync(filepath).toString())
-            };
-          }
-        }
-      }]
-    }
-  }
+      plugins: [
+        {
+          name: "raw-svg-file-loader",
+          transform(_: string, filepath: string) {
+            if (filepath.includes("node_modules")) {
+              return null;
+            }
+            if (filepath.endsWith(".svg")) {
+              return {
+                code: dataToEsm(fs.readFileSync(filepath).toString()),
+              };
+            }
+          },
+        },
+      ],
+    },
+  },
 });

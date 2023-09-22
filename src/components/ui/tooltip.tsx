@@ -3,6 +3,8 @@ import * as React from "react";
 
 import { cn } from "~/utils";
 
+import { UiShimPorps } from "./shim-props";
+
 const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
@@ -11,10 +13,7 @@ const TooltipTrigger = TooltipPrimitive.Trigger;
 
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & {
-    className: string;
-    sideOffset: number;
-  }
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & UiShimPorps
 >(({ className, sideOffset = 4, ...props }, ref) => (
   <TooltipPrimitive.Content
     ref={ref}

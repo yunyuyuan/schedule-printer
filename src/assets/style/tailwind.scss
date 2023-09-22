@@ -1,18 +1,13 @@
+@use "sass:math";
+
 @layer utilities {
-  .monthly-cell {
-    @apply flex flex-col;
+  .monthly-row {
+    @apply grid grid-cols-7;
 
-    width: 14.28%;
-    border-bottom: 1px solid;
-    border-right: 1px solid;
-  }
-
-  .config-row {
-    @apply w-full px-2 mb-4;
-
-    > p {
-      @apply mb-1;
+    .monthly-cell {
+      @apply flex flex-col border-b border-solid border-r;
     }
+
   }
 }
 

@@ -1,29 +1,34 @@
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useState } from "react";
-import { useMount } from "react-use";
+import { useEffect, useState } from "react";
 
 import SvgIcon from "~/components/SvgIcon";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { eventMapAtom } from "~/event";
-import { allConfigAtom, editingAtom } from "~/store";
+import { allConfigAtom, dateAtom, editingAtom } from "~/store";
+import { getTextColor } from "~/utils";
 
 export const MonthSchedule = () => {
   const pageMargin = useAtomValue(allConfigAtom["page-margin"]);
   const cellBorderColor = useAtomValue(allConfigAtom["cell-border-color"]);
+  const calHeaderHeight = useAtomValue(allConfigAtom["cal-header-height"]);
+  const calHeaderBg = useAtomValue(allConfigAtom["cal-header-bg"]);
+  const showHeader = useAtomValue(allConfigAtom["show-header"]);
+  const headerFontSize = useAtomValue(allConfigAtom["header-font-size"]);
 
   const setEventMap = useSetAtom(eventMapAtom);
   const [weeks, setWeeks] = useState<Dayjs[][]>([]);
+  const date = useAtomValue(dateAtom);
 
-  useMount(() => {
+  useEffect(() => {
     // clear
     setEventMap((list) => {
       list.clear();
       return list;
     });
 
-    const day = dayjs().startOf("month");
+    const startDay = date.startOf("month");
 
     const newWeeks: typeof weeks = [];
     const addDayToWeek = (day: Dayjs) => {
@@ -36,38 +41,63 @@ export const MonthSchedule = () => {
     };
 
     // before
-    for (let i = (day.day() + 6) % 7; i > 0; i--) {
-      addDayToWeek(day.add(-i, "day"));
+    for (let i = (startDay.day() + 6) % 7; i > 0; i--) {
+      addDayToWeek(startDay.add(-i, "day"));
     }
-    for (let i = 0; i < day.daysInMonth(); i++) {
-      const newDay = day.add(i, "day");
+    const allDays = startDay.daysInMonth();
+    for (let i = 0; i < allDays; i++) {
+      const newDay = startDay.add(i, "day");
       addDayToWeek(newDay);
       setEventMap((list) => list.set(newDay, []));
     }
     // after
-    const lastDay = dayjs().endOf("month");
-    for (let i = 1; i <= 7 - newWeeks[newWeeks.length - 1].length; i++) {
+    const lastDay = date.endOf("month");
+    const remain = 7 - newWeeks[newWeeks.length - 1].length;
+    for (let i = 1; i <= remain; i++) {
       addDayToWeek(lastDay.add(i, "day"));
     }
 
     setWeeks(newWeeks);
-  });
+  }, [date]);
 
   return (
     <div className="h-screen w-[calc(100%-15rem)] overflow-auto">
       <div
-        className="m-8 bg-white a4-paper"
+        id="print"
+        className="m-8 flex flex-col bg-white a4-paper"
         style={{
-          padding: `${pageMargin}px`,
+          paddingBottom: `${pageMargin}px`,
+          paddingRight: `${pageMargin}px`,
+          paddingLeft: `${pageMargin}px`,
+          paddingTop: showHeader ? 0 : `${pageMargin}px`,
         }}
       >
+        {showHeader && (
+          <div>
+            <p
+              className="text-center"
+              style={{
+                fontSize: headerFontSize + "px",
+              }}
+            >
+              {date.format("YYYY/MM")}
+            </p>
+          </div>
+        )}
         <div
-          className="flex h-full w-full flex-col border-l border-t"
+          className="flex h-full w-full grow flex-col border-l border-t"
           style={{
             borderColor: cellBorderColor,
           }}
         >
-          <div className="flex w-full">
+          <div
+            className="monthly-row w-full"
+            style={{
+              height: calHeaderHeight + "px",
+              color: getTextColor(calHeaderBg),
+              backgroundColor: calHeaderBg,
+            }}
+          >
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((k) => (
               <div
                 key={k}
@@ -80,13 +110,15 @@ export const MonthSchedule = () => {
               </div>
             ))}
           </div>
-          {weeks.map((week, idx) => (
-            <div key={idx} className="flex w-full flex-1">
-              {week.map((day, idx) => (
-                <MonthCell key={idx} day={day}></MonthCell>
-              ))}
-            </div>
-          ))}
+          <div className="flex grow flex-col">
+            {weeks.map((week, idx) => (
+              <div key={idx} className="monthly-row w-full flex-1">
+                {week.map((day, idx) => (
+                  <MonthCell key={idx} day={day}></MonthCell>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
